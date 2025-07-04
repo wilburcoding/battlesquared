@@ -24,40 +24,44 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'
     import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'
-    const firebaseConfig = {
-      apiKey: "AIzaSyB7OCNPbpSzOXGPvaUOKrYyM1dS0j8VYLQ",
-      authDomain: "battlesquared-e8742.firebaseapp.com",
-      projectId: "battlesquared-e8742",
-      storageBucket: "battlesquared-e8742.firebasestorage.app",
-      messagingSenderId: "1030828037619",
-      appId: "1:1030828037619:web:7f1bbc990090976089ae86"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const provider = new GoogleAuthProvider();
-    const auth = getAuth(app);
-
 
     window.onload = () => {
       const socket = io();
-      auth.onAuthStateChanged(function (user) {
-        if (user) {
+      socket.on("apikey", (val) => {
+        const firebaseConfig = {
+          apiKey: val,
+          authDomain: "battlesquared-e8742.firebaseapp.com",
+          projectId: "battlesquared-e8742",
+          storageBucket: "battlesquared-e8742.firebasestorage.app",
+          messagingSenderId: "1030828037619",
+          appId: "1:1030828037619:web:7f1bbc990090976089ae86"
+        };
 
-          var uid = user.uid;
-          console.log(uid);
-          socket.emit("login", uid)
-        } else {
-          signInWithPopup(auth, provider).then((result) => {
-          }).catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            const email = error.customData.email;
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            console.log(errorMessage);
-          });
-        }
+        const app = initializeApp(firebaseConfig);
+        const provider = new GoogleAuthProvider();
+
+
+        const auth = getAuth(app);
+        auth.onAuthStateChanged(function (user) {
+          if (user) {
+
+
+            var uid = user.uid;
+            console.log(uid);
+            socket.emit("login", uid)
+          } else {
+            signInWithPopup(auth, provider).then((result) => {
+            }).catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              const email = error.customData.email;
+              const credential = GoogleAuthProvider.credentialFromError(error);
+              console.log(errorMessage);
+            });
+          }
+        })
       })
-      socket.on("set  _user", () => {
+      socket.on("set_user", () => {
         console.log("need to set user")
       })
       socket.on("user_info", (info) => {
