@@ -34,6 +34,15 @@ io.on("connection", (socket) => {
   socket.on("disconnect", (socket) => {
     console.log("User Disconnected: " + socket.id);
   });
+  
+  socket.on("set_user", (user, id) => {
+    db.run("INSERT INTO users (uid, username) VALUES (?, ?)", [id, user], (err) => {
+      if (err) {
+        console.error(err);
+      }
+      socket.emit("user_info", {uid: id, username: user})
+    });
+  })
 });
 
 app.get('/', (req, res) => {

@@ -9,13 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap"
     rel="stylesheet">
-
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 
 <body>
+  <div id="popupback">
+    <div id="popup">
+      <h1 style="font-size:25px;text-align:center;margin-top:5px;margin-bottom:5px;">Enter your username:</h1>
+      <input type="text" id="newusername">
+      <button id="subnewuser">Submit</button>
+    </div>
+  </div>
   <div id="main-content">
     <div id="menu">
-      <h1 style="font-size:20px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
+      <h1 style="font-size:40px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
+      <p style="font-size:15px;margin-top:1px;margin-bottom:2px;line-height:15px;" id="info">Signing in...</p>
+      <button id="signin">Sign In</button>
 
     </div>
   </div>
@@ -44,28 +54,43 @@
         const auth = getAuth(app);
         auth.onAuthStateChanged(function (user) {
           if (user) {
-
-
             var uid = user.uid;
-            console.log(uid);
+            $("#signin").attr("id","play");
+            $("#play").html("Play");
+            $("#info").html("");
             socket.emit("login", uid)
-          } else {
-            signInWithPopup(auth, provider).then((result) => {
-            }).catch((error) => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              const email = error.customData.email;
-              const credential = GoogleAuthProvider.credentialFromError(error);
-              console.log(errorMessage);
-            });
-          }
+            $("#subnewuser").click(function () {
+              socket.emit("set_user", $("#newusername").val(),uid);
+            })  
+          } 
         })
+        $("#signin").click(function() {
+          signInWithPopup(auth, provider).then((result) => {
+            const user = result.user;
+            console.log(user)
+
+          }).catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            const email = error.customData.email;
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            console.log(errorMessage);
+          });
+        })
+
       })
       socket.on("set_user", () => {
         console.log("need to set user")
+        // do some kind of popup
+        $("#popupback").css("opacity",0);
+        $("#popupback").css("display", "flex");
+        $("#popupback").animate({
+          opacity: 1
+        }, 500);
       })
       socket.on("user_info", (info) => {
-        console.log(info)
+        $("#popupback").css('display',"none");
+        console.log(info);
       })
     }
   </script>
