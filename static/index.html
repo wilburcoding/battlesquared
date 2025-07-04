@@ -21,11 +21,16 @@
       <button id="subnewuser">Submit</button>
     </div>
   </div>
+  <div id="game-content">
+    <div id="g-leftbar">
+
+    </div>
+  </div>
   <div id="main-content">
     <div id="menu">
       <h1 style="font-size:40px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
       <p style="font-size:15px;margin-top:1px;margin-bottom:2px;line-height:15px;" id="info">Signing in...</p>
-      <button id="signin">Sign In</button>
+      <button id="signin" disabled>Sign In</button>
 
     </div>
   </div>
@@ -49,26 +54,36 @@
 
         const app = initializeApp(firebaseConfig);
         const provider = new GoogleAuthProvider();
+        let uinfo = null;
 
 
         const auth = getAuth(app);
         auth.onAuthStateChanged(function (user) {
           if (user) {
             var uid = user.uid;
-            $("#signin").attr("id","play");
+            $("#signin").attr("id", "play");
             $("#play").html("Play");
             $("#info").html("");
             socket.emit("login", uid)
             $("#subnewuser").click(function () {
-              socket.emit("set_user", $("#newusername").val(),uid);
-            })  
-          } 
+              socket.emit("set_user", $("#newusername").val(), uid);
+            })
+            $("#play").off()
+            $("#play").attr("disabled", false)
+            $("#play").click(function () {
+              // open game menu
+              $("#main-content").css("display", "none");
+              $("#game-content").css("display", "flex");
+
+
+            })
+          } else {
+            $("#signin").attr("disabled", false)
+          }
         })
-        $("#signin").click(function() {
+        $("#signin").on("click", function () {
           signInWithPopup(auth, provider).then((result) => {
             const user = result.user;
-            console.log(user)
-
           }).catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
@@ -82,15 +97,23 @@
       socket.on("set_user", () => {
         console.log("need to set user")
         // do some kind of popup
-        $("#popupback").css("opacity",0);
+        $("#popupback").css("opacity", 0);
         $("#popupback").css("display", "flex");
         $("#popupback").animate({
           opacity: 1
-        }, 500);
+        }, 400);
+
       })
       socket.on("user_info", (info) => {
-        $("#popupback").css('display',"none");
+        $("#popupback").animate({
+          opacity: 0
+        }, 400, () => {
+          $("#popupback").css('display', "none");
+
+        });
         console.log(info);
+        uinfo = info;
+        $("#info").html("Signed in as: <strong>" + info.username + "</strong>");
       })
     }
   </script>

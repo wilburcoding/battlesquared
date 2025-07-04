@@ -9,6 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 const sqlite3 = require('sqlite3').verbose(); 
 const db = new sqlite3.Database('./main.sqlite');
+let games = {}
 io.on("connection", (socket) => {
   console.log("User Connected: "+ socket.id);
   socket.emit("apikey", process.env.API_KEY)
@@ -19,12 +20,12 @@ io.on("connection", (socket) => {
   //   socket.emit("apikey", process.env.API_KEY)
   // })
   socket.on("login", (uid) => {
-    console.log(uid);
     db.get("SELECT * FROM users WHERE uid = ?", [uid], (err, row) => {
       if (err) {
         console.error(err);
       }
       if (row) {
+        console.log(row.username + " has logged in (id: " + row.uid + ")")
         socket.emit("user_info", row)
       } else {
         socket.emit("set_user")
@@ -34,12 +35,13 @@ io.on("connection", (socket) => {
   socket.on("disconnect", (socket) => {
     console.log("User Disconnected: " + socket.id);
   });
-  
+
   socket.on("set_user", (user, id) => {
     db.run("INSERT INTO users (uid, username) VALUES (?, ?)", [id, user], (err) => {
       if (err) {
         console.error(err);
       }
+      console.log(row.username + " has logged in (id: " + row.uid + ")")
       socket.emit("user_info", {uid: id, username: user})
     });
   })
