@@ -25,6 +25,17 @@
     <div id="g-leftbar">
 
     </div>
+    <div id="g-center">
+      <div id="g-score">
+        <p id="g-infotop">Connecting to server...</p>
+      </div>
+      <div id="g-board">
+
+      </div>
+    </div>
+    <div id="g-rightbar">
+
+    </div>
   </div>
   <div id="main-content">
     <div id="menu">
@@ -42,6 +53,22 @@
 
     window.onload = () => {
       const socket = io();
+      let uinfo = null
+      for (let i = 0; i < 5; i++) {
+        $("#g-board").append(`
+        <div id="row${i}" class="row">
+          <div class="cell" id="${i}-0"></div>
+          <div class="cell" id="${i}-1"></div>
+          <div class="cell" id="${i}-2"></div>
+          <div class="cell" id="${i}-3"></div>
+          <div class="cell" id="${i}-4"></div>
+          <div class="cell" id="${i}-5"></div>
+          <div class="cell" id="${i}-6"></div>
+          <div class="cell" id="${i}-7"></div>
+        </div>
+        `)
+      }
+      let timer = -1;
       socket.on("apikey", (val) => {
         const firebaseConfig = {
           apiKey: val,
@@ -54,10 +81,8 @@
 
         const app = initializeApp(firebaseConfig);
         const provider = new GoogleAuthProvider();
-        let uinfo = null;
-
-
         const auth = getAuth(app);
+
         auth.onAuthStateChanged(function (user) {
           if (user) {
             var uid = user.uid;
@@ -74,6 +99,7 @@
               // open game menu
               $("#main-content").css("display", "none");
               $("#game-content").css("display", "flex");
+              socket.emit("play", uinfo)
 
 
             })
@@ -114,6 +140,53 @@
         console.log(info);
         uinfo = info;
         $("#info").html("Signed in as: <strong>" + info.username + "</strong>");
+      })
+      socket.on("waiting", () => {
+        $("#g-infotop").html("Waiting for players...");
+      })
+      socket.on("game", (data) => {
+        console.log(data)
+        timer = 60 * 5; // 5 minutes should be enough?
+        // display timer
+
+        $("#g-score").html(`
+        <div class="bgblue" style="width:120px;font-size:22px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
+          <p>${data.blue.username}</p>
+        </div>
+        <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer /60 )}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
+        <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
+          <p>${data.red.username}</p>
+        </div>
+        `)
+        console.log(data.board)
+        for (let i = 0; i < 5;i++) {
+          for (let j = 0; j < 8;j++) {
+            console.log(`#${i}-${j}`)
+            if (data.board[i][j] > 0 ) {
+              $(`#${i}-${j}`).addClass("bgred")
+            } else if (data.board[i][j] < 0) {
+              $(`#${i}-${j}`).addClass("bgblue")
+            } else {
+              $(`#${i}-${j}`).removeClass("bgred")
+              $(`#${i}-${j}`).removeClass("bgblue")
+            }
+          }
+        }
+        setInterval(() => {
+          timer--;
+          $("#g-score").html(`
+            <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
+              <p>${data.blue.username}</p>
+            </div>
+            <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer /60 )}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
+            <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
+              <p>${data.red.username}</p>
+            </div>
+            `)
+          if (timer == 0) {
+            socket.emit("end_game")
+          }
+        }, 1000)
       })
     }
   </script>

@@ -19,24 +19,103 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  width: 1300px;
+  width: 1200px;
   height: 600px;
   background-color: rgba(189, 189, 189, 0.039);
   border: 0.5px solid rgb(90, 90, 90);
   backdrop-filter: blur(5px);
-  border-radius:5px;
-
-
+  border-radius: 5px;
 }
+
 #g-leftbar {
-  width:150px;
-  height:600px;
-  background-color: transparent;
-  display:flex;
+  width: 200px;
+  height: 600px;
+  display: flex;
+  border-radius: 5px 0px 0px 5px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: transparent;
 
+}
+
+#g-center {
+  width: 1000px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent
+}
+
+#g-score {
+  height: 85px;
+  width: 800px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#g-board {
+  height: 500px;
+  width: 800px;
+  background-color: rgba(128, 128, 128, 0.244);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom:15px;
+}
+.row {
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+}
+
+.cell {
+  width:95px;
+  height:95px;
+  margin:2.5px;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-radius:3px;
+  background-color: rgb(156, 156, 156);
+}
+
+.bgred {
+  background-color: rgb(255, 202, 202);
+}
+
+.bgblue {
+  background-color: rgb(195, 195, 255);
+}
+
+.fgred {
+  background-color: rgb(255, 118, 118);
+}
+
+.fgblue {
+  background-color: rgb(120, 120, 255);
+}
+
+
+#g-rightbar {
+  width: 200px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 0px 5px 5px 0px;
+  align-items: center;
+  background-color: transparent;
 
 }
 
@@ -74,7 +153,7 @@ button:hover {
   backdrop-filter: blur(5px);
   border-radius: 5px;
   padding: 25px 50px;
-  border: 0.5px solid rgb(90, 90, 90);  
+  border: 0.5px solid rgb(90, 90, 90);
 }
 
 #popupback {
