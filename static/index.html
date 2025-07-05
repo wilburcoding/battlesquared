@@ -53,21 +53,45 @@
 
     window.onload = () => {
       const socket = io();
-      let uinfo = null
+      let uinfo = null;
+      let selected = null;
+      let gameinfo = null;
       for (let i = 0; i < 5; i++) {
         $("#g-board").append(`
         <div id="row${i}" class="row">
-          <div class="cell" id="${i}-0"></div>
-          <div class="cell" id="${i}-1"></div>
-          <div class="cell" id="${i}-2"></div>
-          <div class="cell" id="${i}-3"></div>
-          <div class="cell" id="${i}-4"></div>
-          <div class="cell" id="${i}-5"></div>
-          <div class="cell" id="${i}-6"></div>
-          <div class="cell" id="${i}-7"></div>
+          <div class="cell" id="${i}-0"><p id="${i}-0p"></p></div>
+          <div class="cell" id="${i}-1"><p id="${i}-1p"></p></div>
+          <div class="cell" id="${i}-2"><p id="${i}-2p"></p></div>
+          <div class="cell" id="${i}-3"><p id="${i}-3p"></p></div>
+          <div class="cell" id="${i}-4"><p id="${i}-4p"></p></div>
+          <div class="cell" id="${i}-5"><p id="${i}-5p"></p></div>
+          <div class="cell" id="${i}-6"><p id="${i}-6p"></p></div>
+          <div class="cell" id="${i}-7"><p id="${i}-7p"></p></div>
         </div>
         `)
       }
+      $(".cell").click(function () {
+        console.log(gameinfo);
+        console.log(uinfo)
+        const coord = [$(this).attr("id").split("-")[0], $(this).attr("id").split("-")[1]]
+        if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid  ? "bgblue" : "bgred")) {
+          return
+        }
+        if (selected == null) {
+          if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length > 0) {
+            selected = coord;
+            console.log(selected)
+            $("#" + coord[0] + "-" + coord[1]).addClass("selected")
+          }
+        } else {
+          if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length > 0) {
+            console.log("clicked on same")
+          } else {
+            console.log("clicked on gray?")
+          }
+        }
+
+      })
       let timer = -1;
       socket.on("apikey", (val) => {
         const firebaseConfig = {
@@ -153,22 +177,29 @@
         <div class="bgblue" style="width:120px;font-size:22px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
           <p>${data.blue.username}</p>
         </div>
-        <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer /60 )}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
+        <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer / 60)}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
         <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
           <p>${data.red.username}</p>
         </div>
         `)
+        gameinfo = data
         console.log(data.board)
-        for (let i = 0; i < 5;i++) {
-          for (let j = 0; j < 8;j++) {
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 8; j++) {
             console.log(`#${i}-${j}`)
-            if (data.board[i][j] > 0 ) {
+            if (data.board[i][j] < 0) {
               $(`#${i}-${j}`).addClass("bgred")
-            } else if (data.board[i][j] < 0) {
+            } else if (data.board[i][j] > 0) {
               $(`#${i}-${j}`).addClass("bgblue")
             } else {
               $(`#${i}-${j}`).removeClass("bgred")
               $(`#${i}-${j}`).removeClass("bgblue")
+            }
+            if (Math.abs(data.board[i][j]) > 0) {
+              $(`#${i}-${j}p`).html(Math.abs(data.board[i][j]))
+            } else {
+              $(`#${i}-${j}p`).html("")
+
             }
           }
         }
@@ -178,7 +209,7 @@
             <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
               <p>${data.blue.username}</p>
             </div>
-            <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer /60 )}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
+            <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer / 60)}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
             <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
               <p>${data.red.username}</p>
             </div>

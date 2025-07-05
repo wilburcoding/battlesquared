@@ -89,6 +89,14 @@ body {
   border-radius:3px;
   background-color: rgb(156, 156, 156);
 }
+.cell p {
+  font-size: 24px;
+  font-weight: 800;
+}
+.selected {
+  border:2px solid black;
+  margin:0.5px;
+}
 
 .bgred {
   background-color: rgb(255, 202, 202);
