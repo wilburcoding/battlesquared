@@ -20,7 +20,10 @@ function ndat(dat) {
     red:dat.red.info,
     blue:dat.blue.info,
     board:dat.board,
-    timestart:dat.timestart
+    timestart:dat.timestart,
+    id:dat.id,
+    rbank:dat.rbank,
+    bbank:dat.bbank
   }
 }
 io.on("connection", (socket) => {
@@ -32,6 +35,7 @@ io.on("connection", (socket) => {
   // socket.on("apikey",() => {
   //   socket.emit("apikey", process.env.API_KEY)
   // })
+  
   socket.on("login", (uid) => {
     db.get("SELECT * FROM users WHERE uid = ?", [uid], (err, row) => {
       if (err) {
@@ -77,7 +81,10 @@ io.on("connection", (socket) => {
         red: waiting,
         blue: { info: info, socket: socket },
         board: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [2, 0, 0, 0, 0, 0, 0, -2], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]],
-        timestart: Date.now()
+        timestart: Date.now(),
+        id:id,
+        rbank:[],
+        bbank:[],
       }
   
       waiting.socket.emit("game", ndat(games[id]))
@@ -86,6 +93,40 @@ io.on("connection", (socket) => {
       console.log(games)
       
     }
+  })
+  socket.on("move", (id, selected, coord) => {
+    if (selected[0] == "r") {
+      games[id].board[coord[0]][coord[1]] = -1 * games[id].rbank[Number(selected[1])]
+      games[id].rbank.splice(Number(selected[1]), 1)
+    } else if (selected[0] == "b") {
+      games[id].board[coord[0]][coord[1]] = games[id].bbank[Number(selected[1])]
+      games[id].bbank.splice(Number(selected[1]), 1)
+    } else {
+      games[id].board[coord[0]][coord[1]] = games[id].board[selected[0]][selected[1]]
+      games[id].board[selected[0]][selected[1]] = 0
+    }
+    games[id].red.socket.emit("update_game", ndat(games[id]))
+    games[id].blue.socket.emit("update_game", ndat(games[id]))
+
+  })
+  socket.on("combine", (id, selected, coord) => {
+    if (games[id].board[selected[0]][selected[1]] == games[id].board[coord[0]][coord[1]]) {
+      games[id].board[coord[0]][coord[1]] *=2
+      games[id].board[selected[0]][selected[1]] = 0
+    }
+    games[id].red.socket.emit("update_game", ndat(games[id]))
+    games[id].blue.socket.emit("update_game", ndat(games[id]))
+
+  })
+  socket.on("add_bank", (gid, uid, val) => {
+    console.log(games)
+    if (games[gid].red.info.uid == uid) {
+      games[gid].rbank.push(val)
+    } else {
+      games[gid].bbank.push(val)
+    }
+    games[gid].red.socket.emit("update_bank", ndat(games[gid]))
+    games[gid].blue.socket.emit("update_bank", ndat(games[gid]))
   })
 
 });

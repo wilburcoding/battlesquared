@@ -55,6 +55,7 @@
       const socket = io();
       let uinfo = null;
       let selected = null;
+      let bankselected = null;
       let gameinfo = null;
       for (let i = 0; i < 5; i++) {
         $("#g-board").append(`
@@ -71,28 +72,119 @@
         `)
       }
       $(".cell").click(function () {
-        console.log(gameinfo);
-        console.log(uinfo)
         const coord = [$(this).attr("id").split("-")[0], $(this).attr("id").split("-")[1]]
-        if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid  ? "bgblue" : "bgred")) {
+        if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid ? "bgblue" : "bgred")) {
           return
         }
+
         if (selected == null) {
           if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length > 0) {
             selected = coord;
             console.log(selected)
             $("#" + coord[0] + "-" + coord[1]).addClass("selected")
           }
+
         } else {
-          if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length > 0) {
-            console.log("clicked on same")
+          if (selected[0] == "b" || selected[0] == "r") {
+            if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length == 0) {
+              if (selected[0] == "b") {
+                if (coord[1] == 0) {
+                  socket.emit("move", gameinfo.id, selected, coord)
+                  selected = null
+                }
+              } else {
+                if (coord[1] == 7) {
+                  socket.emit("move", gameinfo.id, selected, coord)
+                  selected = null
+                }
+              }
+            }
+
           } else {
-            console.log("clicked on gray?")
+            if (selected[0] == coord[0] && selected[1] == coord[1]) {
+              selected = null;
+              $(this).removeClass("selected")
+              return;
+            }
+            // only can do action to cells next to current selected
+            if (Math.abs(selected[0] - coord[0]) > 1 || Math.abs(selected[1] - coord[1]) > 1) {
+              return
+            }
+            // no diagonal
+            if (Math.abs(selected[0] - coord[0]) == Math.abs(selected[1] - coord[1])) {
+              return
+            }
+            if (String($("#" + coord[0] + "-" + coord[1] + "p").html()).length > 0) {
+              if (String($("#" + coord[0] + "-" + coord[1] + "p").html()) == String($("#" + selected[0] + "-" + selected[1] + "p").html())) {
+                if (coord[1] == 0 || coord[1] == 7) {
+                  return;
+                }
+                socket.emit("combine", gameinfo.id, selected, coord)
+                $("#" + selected[0] + "-" + selected[1]).removeClass("selected")
+                selected = null
+              }
+            } else {
+              if (coord[1] == 0 || coord[1] == 7) {
+                return;
+              }
+              socket.emit("move", gameinfo.id, selected, coord)
+              $("#" + selected[0] + "-" + selected[1]).removeClass("selected")
+              selected = null
+            }
           }
         }
 
       })
       let timer = -1;
+      let bank = [];
+      function updateBank() {
+        // check if player is red first
+        $("#g-rightbar").html("");
+
+        console.log(gameinfo)
+        for (let i = 0; i < gameinfo.rbank.length; i++) {
+          console.log(gameinfo.rbank[i])
+          $("#g-rightbar").append(`<div class="cell bankitem bgred" id="rb-${i}"><p id="rb-${i}p">${gameinfo.rbank[i]}</p></div>`)
+        }
+
+        $("#g-leftbar").html("");
+        for (let i = 0; i < gameinfo.bbank.length; i++) {
+          $("#g-leftbar").append(`<div class="cell bankitem bgblue" id="bb-${i}"><p id="bb-${i}p">${gameinfo.bbank[i]}</p></div>`);
+        }
+        $(".bankitem").click(function () {
+          if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid ? "bgblue" : "bgred")) {
+            return;
+          }
+          const letter = gameinfo.red.uid == uinfo.uid ? "r" : "b"
+          if (selected == null) {
+            selected = [letter, $(this).attr("id").split("-")[1]]
+            $(this).addClass("selected")
+          } else {
+            if (selected[1] == $(this).attr("id").split("-")[1]) {
+              selected = null;
+              $(this).removeClass("selected")
+            } else {
+              selected = [letter, $(this).attr("id").split("-")[1]]
+              $(this).addClass("selected")
+              $(".bankitem").not(this).removeClass("selected")
+            }
+
+          }
+        })
+        if (selected == null) {
+          return;
+        }
+        if (gameinfo.red.uid == uinfo.uid) {
+
+          if (selected[0] == "r") {
+            $("#rb-" + selected[1]).addClass("selected")
+          }
+        } else {
+          if (selected[0] == "b") {
+            $("#bb-" + selected[1]).addClass("selected")
+          }
+        }
+      }
       socket.on("apikey", (val) => {
         const firebaseConfig = {
           apiKey: val,
@@ -102,14 +194,13 @@
           messagingSenderId: "1030828037619",
           appId: "1:1030828037619:web:7f1bbc990090976089ae86"
         };
-
         const app = initializeApp(firebaseConfig);
         const provider = new GoogleAuthProvider();
         const auth = getAuth(app);
-
         auth.onAuthStateChanged(function (user) {
           if (user) {
             var uid = user.uid;
+
             $("#signin").attr("id", "play");
             $("#play").html("Play");
             $("#info").html("");
@@ -117,6 +208,7 @@
             $("#subnewuser").click(function () {
               socket.emit("set_user", $("#newusername").val(), uid);
             })
+
             $("#play").off()
             $("#play").attr("disabled", false)
             $("#play").click(function () {
@@ -168,6 +260,35 @@
       socket.on("waiting", () => {
         $("#g-infotop").html("Waiting for players...");
       })
+      socket.on("update_game", (data) => {
+        gameinfo = data
+        console.log(data.board)
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 8; j++) {
+            console.log(`#${i}-${j}`)
+            if (data.board[i][j] < 0) {
+              $(`#${i}-${j}`).addClass("bgred")
+            } else if (data.board[i][j] > 0) {
+              $(`#${i}-${j}`).addClass("bgblue")
+            } else {
+              $(`#${i}-${j}`).removeClass("bgred")
+              $(`#${i}-${j}`).removeClass("bgblue")
+            }
+            if (Math.abs(data.board[i][j]) > 0) {
+              $(`#${i}-${j}p`).html(Math.abs(data.board[i][j]))
+            } else {
+              $(`#${i}-${j}p`).html("")
+
+            }
+          }
+        }
+        updateBank();
+      })
+      socket.on("update_bank", (gamedat) => {
+        gameinfo = gamedat
+        updateBank();
+      })
+
       socket.on("game", (data) => {
         console.log(data)
         timer = 60 * 5; // 5 minutes should be enough?
@@ -205,6 +326,7 @@
         }
         setInterval(() => {
           timer--;
+          console.log('ea')
           $("#g-score").html(`
             <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
               <p>${data.blue.username}</p>
@@ -218,6 +340,24 @@
             socket.emit("end_game")
           }
         }, 1000)
+        setInterval(() => {
+          if (timer > 0) {
+            if (gameinfo.red.uid == uinfo.uid) {
+              if (gameinfo.rbank.length < 3 && Math.random() > 0.6) {
+                const val = [2, 4][Math.floor((Math.random() * 2))]
+                socket.emit("add_bank", gameinfo.id, uinfo.uid, val);
+                bank.push(val)
+              }
+            } else {
+              if (gameinfo.bbank.length < 3 && Math.random() > 0.6) {
+                const val = [2, 4][Math.floor((Math.random() * 2))]
+                socket.emit("add_bank", gameinfo.id, uinfo.uid, val);
+                bank.push(val)
+              }
+
+            }
+          }
+        }, 500)
       })
     }
   </script>
