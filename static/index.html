@@ -11,6 +11,8 @@
     rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"
     integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=crown" />
 </head>
 
 <body>
@@ -21,6 +23,38 @@
       <button id="subnewuser">Submit</button>
     </div>
   </div>
+  <div id="popupback2">
+    <div id="popup2">
+      <h1 style="font-size:40px;text-align:center;margin-top:5px;margin-bottom:5px;">Game Over</h1>
+      <div style="display:flex;flex-direction: row;align-items: center;justify-content: center;">
+        <div
+          style="position:relative;width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
+          class="bgblue" id="bresult">
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" id="buser">Username 1</p>
+          <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="bscore">2156</p>
+        </div>
+        <div
+          style="width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
+          class="bgred" id="rresult">
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" id="ruser">Username 1</p>
+          <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="rscore">2156</p>
+
+        </div>
+      </div>
+      <button id="return">Return Home</button>
+    </div>
+  </div>
+  <div id="popupback3">
+    <div id="popup3">
+      <h1 style="font-size:40px;text-align:center;margin-top:5px;margin-bottom:5px;">How to Play</h1>
+      <p style="max-width:400px;margin-left:20px;margin-right:20px;margin-top:4px;">
+        Once you found a game, you have 5 minutes to get the highest score possible. The score is calculated based on the sum of the pieces you have on the board.
+        <br>You put pieces from your pile onto the starting area of the board. From there, you can only move your piece out of the starting area. Out of the starting area, you can move your piece or combine it with other pieces of the same value. 
+        <br>You can capture your opponent's pieces by sandwiching their piece between two of yours.        
+      </p>
+    </div>
+  </div>
+  
   <div id="game-content">
     <div id="g-leftbar">
 
@@ -42,6 +76,9 @@
       <h1 style="font-size:40px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
       <p style="font-size:15px;margin-top:1px;margin-bottom:2px;line-height:15px;" id="info">Signing in...</p>
       <button id="signin" disabled>Sign In</button>
+      <button id="how">How to Play</button>
+
+      <button id="logout" style="display:none">Log Out</button>
 
     </div>
   </div>
@@ -49,7 +86,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'
 
     window.onload = () => {
       const socket = io();
@@ -71,7 +108,17 @@
         </div>
         `)
       }
+      $("#return").click(function () {
+        window.location.reload();
+      })
+      $("#how").click(function() {
+        $("#popupback3").css("opacity", 0);
+        $("#popupback3").css("display", "flex");
+        setTimeout(() => {
+          $("#popupback3").css("opacity", 1);
+        }, 500)
 
+      })
       $(".cell").click(function () {
         const coord = [$(this).attr("id").split("-")[0], $(this).attr("id").split("-")[1]]
         if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid ? "bgblue" : "bgred")) {
@@ -139,7 +186,7 @@
       let timer = -1;
       let start = null;
       let bank = [];
-      
+
       function updateBank() {
         // check if player is red first
         $("#g-rightbar").html("");
@@ -205,7 +252,7 @@
             var uid = user.uid;
 
             $("#signin").attr("id", "play");
-            $("#play").html("Play");
+            $("#play").html("Play Game");
             $("#info").html("");
             socket.emit("login", uid)
             $("#subnewuser").click(function () {
@@ -214,6 +261,7 @@
 
             $("#play").off()
             $("#play").attr("disabled", false)
+            $("#logout").css("display", "block")
             $("#play").click(function () {
               // open game menu
               $("#main-content").css("display", "none");
@@ -221,8 +269,20 @@
               socket.emit("play", uinfo)
             })
           } else {
+            $("#logout").css("display", "none")
             $("#signin").attr("disabled", false)
           }
+        })
+        $("#logout").click(function () {
+          signOut(auth)
+            .then(() => {
+              console.log("User signed out successfully.");
+              window.location.reload();
+
+            })
+            .catch((error) => {
+              console.error("Sign out error:", error);
+            });
         })
         $("#signin").on("click", function () {
           signInWithPopup(auth, provider).then((result) => {
@@ -273,22 +333,79 @@
               $(`#${i}-${j}`).addClass("bgred")
             } else if (gameinfo.board[i][j] > 0) {
               $(`#${i}-${j}`).addClass("bgblue")
-            } 
+            }
             if (Math.abs(data.board[i][j]) > 0) {
               $(`#${i}-${j}p`).html(Math.abs(data.board[i][j]))
             } else {
               $(`#${i}-${j}p`).html("")
-
             }
           }
         }
         updateBank();
       })
+
+
       socket.on("update_bank", (gamedat) => {
         gameinfo = gamedat
         updateBank();
       })
 
+      socket.on("end_game_results", (data) => {
+        timer = -100;
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 8; j++) {
+            console.log(`#${i}-${j}`)
+            $(`#${i}-${j}`).removeClass("bgred")
+            $(`#${i}-${j}`).removeClass("bgblue")
+            if (gameinfo.board[i][j] < 0) {
+              $(`#${i}-${j}`).addClass("bgred")
+            } else if (gameinfo.board[i][j] > 0) {
+              $(`#${i}-${j}`).addClass("bgblue")
+            }
+            if (Math.abs(data.board[i][j]) > 0) {
+              $(`#${i}-${j}p`).html(Math.abs(data.board[i][j]))
+            } else {
+              $(`#${i}-${j}p`).html("")
+            }
+          }
+        }
+        updateBank();
+        let rscore = 0;
+        let bscore = 0;
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (gameinfo.board[i][j] < 0) {
+              rscore += Math.abs(gameinfo.board[i][j])
+            } else if (gameinfo.board[i][j] > 0) {
+              bscore += gameinfo.board[i][j]
+            }
+          }
+        }
+
+        $("#ruser").html(gameinfo.red.username);
+        $("#buser").html(gameinfo.blue.username);
+        $("#rscore").html(rscore);
+        $("#bscore").html(bscore);
+        $("#popupback2").css("opacity", 0);
+        $("#popupback2").css("display", "flex");
+        $("#popupback2").animate({
+          opacity: 1
+        }, 500)
+        if (bscore >= rscore) {
+          $("#bresult").append(`
+          <span class="material-symbols-outlined"
+            style="color:yellow;position:absolute;top:10px;left:10px;font-size:30px;font-weight: 800;">
+            crown
+          </span>`)
+        }
+        if (rscore >= bscore) {
+          $("#rresult").append(`
+          <span class="material-symbols-outlined"
+            style="color:yellow;position:absolute;top:10px;left:10px;font-size:30px;font-weight: 800;">
+            crown
+          </span>`)
+        }
+      })
       socket.on("game", (data) => {
         console.log(data)
         timer = 60 * 5; // 5 minutes should be enough?
@@ -327,8 +444,11 @@
 
         start = Date.now()
         setInterval(() => {
-          timer=(5*60) - Math.floor((Date.now() - start) / 1000);
-          console.log('ea')
+          timer = (5 * 60) - Math.floor((Date.now() - start) / 1000);
+          if (timer < 0) {
+            timer = 0
+            return;
+          }
           $("#g-score").html(`
             <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
               <p>${data.blue.username}</p>
@@ -339,7 +459,8 @@
             </div>
             `)
           if (timer == 0) {
-            socket.emit("end_game")
+            socket.emit("end_game", gameinfo.id)
+
           }
         }, 1000)
         setInterval(() => {

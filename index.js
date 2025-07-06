@@ -94,6 +94,16 @@ io.on("connection", (socket) => {
 
     }
   })
+  socket.on("end_game", (id) => {
+    try {
+      games[id].red.socket.emit("end_game_results", ndat(games[id]))
+      games[id].blue.socket.emit("end_game_results", ndat(games[id]))
+      games[id] = null;
+    } catch (e) {
+      console.log(e)
+    }
+
+  })
   socket.on("move", (id, selected, coord) => {
     if (selected[0] == "r") {
       games[id].board[coord[0]][coord[1]] = -1 * games[id].rbank[Number(selected[1])]
@@ -125,8 +135,13 @@ io.on("connection", (socket) => {
       }
     }
     console.log(games[id].board)
-    games[id].red.socket.emit("update_game", ndat(games[id]))
-    games[id].blue.socket.emit("update_game", ndat(games[id]))
+    try {
+      games[id].red.socket.emit("update_game", ndat(games[id]))
+      games[id].blue.socket.emit("update_game", ndat(games[id]))
+    } catch (e) {
+      console.log(e)
+    }
+
 
 
   })
@@ -135,8 +150,12 @@ io.on("connection", (socket) => {
       games[id].board[coord[0]][coord[1]] *= 2
       games[id].board[selected[0]][selected[1]] = 0
     }
-    games[id].red.socket.emit("update_game", ndat(games[id]))
-    games[id].blue.socket.emit("update_game", ndat(games[id]))
+    try {
+      games[id].red.socket.emit("update_game", ndat(games[id]))
+      games[id].blue.socket.emit("update_game", ndat(games[id]))
+    } catch (e) {
+      console.log(e)
+    }
 
   })
   socket.on("add_bank", (gid, uid, val) => {
@@ -146,8 +165,12 @@ io.on("connection", (socket) => {
     } else {
       games[gid].bbank.push(val)
     }
-    games[gid].red.socket.emit("update_bank", ndat(games[gid]))
-    games[gid].blue.socket.emit("update_bank", ndat(games[gid]))
+    try {
+      games[id].red.socket.emit("update_game", ndat(games[id]))
+      games[id].blue.socket.emit("update_game", ndat(games[id]))
+    } catch (e) {
+      console.log(e)
+    }
   })
 
 });

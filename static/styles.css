@@ -170,7 +170,56 @@ button:hover {
   padding: 25px 50px;
   border: 0.5px solid rgb(90, 90, 90);
 }
+#popupback3 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+}
 
+#popup3 {
+  padding: 15px;
+  display: flex;
+  padding: 15px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: rgb(255, 247, 237);
+  border-radius: 2px;
+}
+#popupback2 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+}
+
+#popup2 {
+  padding: 15px;
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: rgb(255, 247, 237);
+  border-radius: 2px;
+}
 #popupback {
   position: fixed;
   top: 0;
