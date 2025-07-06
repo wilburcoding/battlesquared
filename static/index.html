@@ -48,16 +48,21 @@
     <div id="popup3">
       <h1 style="font-size:40px;text-align:center;margin-top:5px;margin-bottom:5px;">How to Play</h1>
       <p style="max-width:400px;margin-left:20px;margin-right:20px;margin-top:4px;">
-        Once you found a game, you have 5 minutes to get the highest score possible. The score is calculated based on the sum of the pieces you have on the board.
-        <br>You put pieces from your pile onto the starting area of the board. From there, you can only move your piece out of the starting area. Out of the starting area, you can move your piece or combine it with other pieces of the same value. 
-        <br>You can capture your opponent's pieces by sandwiching their piece between two of yours.        
+        Once you found a game, you have 5 minutes to get the highest score possible. The score is calculated based on
+        the sum of the pieces you have on the board.
+        <br>You put pieces from your pile onto the starting area of the board. From there, you can only move your piece
+        out of the starting area. Out of the starting area, you can move your piece or combine it with other pieces of
+        the same value.
+        <br>You can capture your opponent's pieces by sandwiching their piece between two of yours.
       </p>
+      <button id="close">Close</button>
+
     </div>
+
   </div>
-  
+
   <div id="game-content">
     <div id="g-leftbar">
-
     </div>
     <div id="g-center">
       <div id="g-score">
@@ -111,12 +116,19 @@
       $("#return").click(function () {
         window.location.reload();
       })
-      $("#how").click(function() {
+      $("#close").click(function () {
+        $("#popupback3").animate({
+          opacity: 0
+        }, 400, () => {
+          $("#popupback3").css("display", "none");
+        })
+      })
+      $("#how").click(function () {
         $("#popupback3").css("opacity", 0);
         $("#popupback3").css("display", "flex");
-        setTimeout(() => {
-          $("#popupback3").css("opacity", 1);
-        }, 500)
+        $("#popupback3").animate({
+          opacity:1,
+        }, 400)
 
       })
       $(".cell").click(function () {
@@ -297,6 +309,7 @@
         })
 
       })
+      
       socket.on("set_user", () => {
         console.log("need to set user")
         // do some kind of popup
@@ -342,6 +355,19 @@
           }
         }
         updateBank();
+        let rscore = 0;
+        let bscore = 0;
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (gameinfo.board[i][j] < 0) {
+              rscore += Math.abs(gameinfo.board[i][j])
+            } else if (gameinfo.board[i][j] > 0) {
+              bscore += gameinfo.board[i][j]
+            }
+          }
+        }
+        $("#g-rscore").html(rscore);
+        $("#g-bscore").html(bscore);
       })
 
 
@@ -412,12 +438,14 @@
         // display timer
 
         $("#g-score").html(`
-        <div class="bgblue" style="width:120px;font-size:22px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
-          <p>${data.blue.username}</p>
+        <div class="bgblue" style="width:120px;font-size:30px;font-weight:800;padding:5px 10px;height:50px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <p style="margin-top:1px;margin-bottom:2px;" id="g-bscore">0</p>
+          <p style="font-size:15px;font-weight:400;margin-top:1px;margin-bottom:3px;">${data.blue.username}</p>
         </div>
         <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer / 60)}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
-        <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
-          <p>${data.red.username}</p>
+        <div class="bgred" style="width:120px;font-size:30px;font-weight:800;padding:5px 10px;height:50px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <p style="margin-top:1px;margin-bottom:2px;" id="g-rscore">0</p>
+          <p style="font-size:15px;font-weight:400;margin-top:1px;margin-bottom:3px;">${data.red.username}</p>
         </div>
         `)
         gameinfo = data
@@ -450,17 +478,18 @@
             return;
           }
           $("#g-score").html(`
-            <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
-              <p>${data.blue.username}</p>
-            </div>
-            <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer / 60)}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
-            <div class="bgred" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">
-              <p>${data.red.username}</p>
-            </div>
-            `)
+        <div class="bgblue" style="width:120px;font-size:30px;font-weight:800;padding:5px 10px;height:50px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <p style="margin-top:1px;margin-bottom:2px;" id="g-bscore">${$("#g-bscore").html()}</p>
+          <p style="font-size:15px;font-weight:400;margin-top:1px;margin-bottom:3px;">${data.blue.username}</p>
+        </div>
+        <p style="font-size:40px;font-weight:800;margin-left:200px;margin-right:200px;">${Math.floor(timer / 60)}:${(timer % 60 < 10) ? "0" + (timer % 60) : timer % 60}</p>
+        <div class="bgred" style="width:120px;font-size:30px;font-weight:800;padding:5px 10px;height:50px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <p style="margin-top:1px;margin-bottom:2px;" id="g-rscore">${$("#g-rscore").html()}</p>
+          <p style="font-size:15px;font-weight:400;margin-top:1px;margin-bottom:3px;">${data.red.username}</p>
+        </div>
+        `)
           if (timer == 0) {
             socket.emit("end_game", gameinfo.id)
-
           }
         }, 1000)
         setInterval(() => {

@@ -166,8 +166,8 @@ io.on("connection", (socket) => {
       games[gid].bbank.push(val)
     }
     try {
-      games[id].red.socket.emit("update_game", ndat(games[id]))
-      games[id].blue.socket.emit("update_game", ndat(games[id]))
+      games[gid].red.socket.emit("update_game", ndat(games[gid]))
+      games[gid].blue.socket.emit("update_game", ndat(games[gid]))
     } catch (e) {
       console.log(e)
     }
