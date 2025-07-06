@@ -17,13 +17,13 @@ const genid = (length = 10) => {
 
 function ndat(dat) {
   return {
-    red:dat.red.info,
-    blue:dat.blue.info,
-    board:dat.board,
-    timestart:dat.timestart,
-    id:dat.id,
-    rbank:dat.rbank,
-    bbank:dat.bbank
+    red: dat.red.info,
+    blue: dat.blue.info,
+    board: dat.board,
+    timestart: dat.timestart,
+    id: dat.id,
+    rbank: dat.rbank,
+    bbank: dat.bbank
   }
 }
 io.on("connection", (socket) => {
@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
   // socket.on("apikey",() => {
   //   socket.emit("apikey", process.env.API_KEY)
   // })
-  
+
   socket.on("login", (uid) => {
     db.get("SELECT * FROM users WHERE uid = ?", [uid], (err, row) => {
       if (err) {
@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
   })
   socket.on("play", (info) => {
     if (waiting == null) {
-      waiting = {info: info, socket: socket}
+      waiting = { info: info, socket: socket }
       socket.emit("waiting")
       console.log("Someone is waiting...")
     } else if (waiting != null && waiting.socket != socket) {
@@ -82,16 +82,16 @@ io.on("connection", (socket) => {
         blue: { info: info, socket: socket },
         board: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [2, 0, 0, 0, 0, 0, 0, -2], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]],
         timestart: Date.now(),
-        id:id,
-        rbank:[],
-        bbank:[],
+        id: id,
+        rbank: [],
+        bbank: [],
       }
-  
+
       waiting.socket.emit("game", ndat(games[id]))
       socket.emit("game", ndat(games[id]))
       waiting = null
       console.log(games)
-      
+
     }
   })
   socket.on("move", (id, selected, coord) => {
@@ -105,13 +105,34 @@ io.on("connection", (socket) => {
       games[id].board[coord[0]][coord[1]] = games[id].board[selected[0]][selected[1]]
       games[id].board[selected[0]][selected[1]] = 0
     }
+    //checking capturing - piece sandwiched between other pieces
+    console.log(games[id].board)
+    for (let i = 0; i < 5; i++) {
+      for (let j = 1; j < 6; j++) {
+        if (i > 0 && i < 5) {
+
+          if ((games[id].board[i - 1][j] > 0 && games[id].board[i][j] < 0 && games[id].board[i + 1][j] > 0) || (games[id].board[i - 1][j] < 0 && games[id].board[i][j] > 0 && games[id].board[i + 1][j] < 0)) {
+            console.log(games[id].board[i][j])
+            games[id].board[i][j] *= -1
+            console.log('gehaiu')
+            console.log(games[id].board[i][j])
+          }
+        }
+        if ((games[id].board[i][j - 1] > 0 && games[id].board[i][j] < 0 && games[id].board[i][j + 1] > 0) || (games[id].board[i][j - 1] < 0 && games[id].board[i][j] > 0 && games[id].board[i][j + 1] < 0)) {
+          console.log('ea')
+          games[id].board[i][j] *= -1
+        }
+      }
+    }
+    console.log(games[id].board)
     games[id].red.socket.emit("update_game", ndat(games[id]))
     games[id].blue.socket.emit("update_game", ndat(games[id]))
+
 
   })
   socket.on("combine", (id, selected, coord) => {
     if (games[id].board[selected[0]][selected[1]] == games[id].board[coord[0]][coord[1]]) {
-      games[id].board[coord[0]][coord[1]] *=2
+      games[id].board[coord[0]][coord[1]] *= 2
       games[id].board[selected[0]][selected[1]] = 0
     }
     games[id].red.socket.emit("update_game", ndat(games[id]))

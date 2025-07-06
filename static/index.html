@@ -60,17 +60,18 @@
       for (let i = 0; i < 5; i++) {
         $("#g-board").append(`
         <div id="row${i}" class="row">
-          <div class="cell" id="${i}-0"><p id="${i}-0p"></p></div>
+          <div class="cell tintb" id="${i}-0"><p id="${i}-0p"></p></div>
           <div class="cell" id="${i}-1"><p id="${i}-1p"></p></div>
           <div class="cell" id="${i}-2"><p id="${i}-2p"></p></div>
           <div class="cell" id="${i}-3"><p id="${i}-3p"></p></div>
           <div class="cell" id="${i}-4"><p id="${i}-4p"></p></div>
           <div class="cell" id="${i}-5"><p id="${i}-5p"></p></div>
           <div class="cell" id="${i}-6"><p id="${i}-6p"></p></div>
-          <div class="cell" id="${i}-7"><p id="${i}-7p"></p></div>
+          <div class="cell tintr" id="${i}-7"><p id="${i}-7p"></p></div>
         </div>
         `)
       }
+
       $(".cell").click(function () {
         const coord = [$(this).attr("id").split("-")[0], $(this).attr("id").split("-")[1]]
         if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid ? "bgblue" : "bgred")) {
@@ -136,7 +137,9 @@
 
       })
       let timer = -1;
+      let start = null;
       let bank = [];
+      
       function updateBank() {
         // check if player is red first
         $("#g-rightbar").html("");
@@ -216,8 +219,6 @@
               $("#main-content").css("display", "none");
               $("#game-content").css("display", "flex");
               socket.emit("play", uinfo)
-
-
             })
           } else {
             $("#signin").attr("disabled", false)
@@ -324,8 +325,10 @@
             }
           }
         }
+        
+        start = Date.now()
         setInterval(() => {
-          timer--;
+          timer=(5*60) - Math.floor((Date.now() - start) / 1000);
           console.log('ea')
           $("#g-score").html(`
             <div class="bgblue" style="font-size:22px;width:120px;font-weight:500;padding:5px 10px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;">

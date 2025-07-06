@@ -105,6 +105,13 @@ body {
 .bgblue {
   background-color: rgb(195, 195, 255);
 }
+.tintb:not(.bgblue) {
+  background-color: rgb(154, 154, 183);
+}
+.tintr:not(.bgred) {
+  background-color: rgb(167, 147, 147);
+}
+
 
 .fgred {
   background-color: rgb(255, 118, 118);
