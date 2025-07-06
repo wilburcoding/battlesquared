@@ -267,14 +267,13 @@
         for (let i = 0; i < 5; i++) {
           for (let j = 0; j < 8; j++) {
             console.log(`#${i}-${j}`)
-            if (data.board[i][j] < 0) {
+            $(`#${i}-${j}`).removeClass("bgred")
+            $(`#${i}-${j}`).removeClass("bgblue")
+            if (gameinfo.board[i][j] < 0) {
               $(`#${i}-${j}`).addClass("bgred")
-            } else if (data.board[i][j] > 0) {
+            } else if (gameinfo.board[i][j] > 0) {
               $(`#${i}-${j}`).addClass("bgblue")
-            } else {
-              $(`#${i}-${j}`).removeClass("bgred")
-              $(`#${i}-${j}`).removeClass("bgblue")
-            }
+            } 
             if (Math.abs(data.board[i][j]) > 0) {
               $(`#${i}-${j}p`).html(Math.abs(data.board[i][j]))
             } else {
@@ -325,7 +324,7 @@
             }
           }
         }
-        
+
         start = Date.now()
         setInterval(() => {
           timer=(5*60) - Math.floor((Date.now() - start) / 1000);
