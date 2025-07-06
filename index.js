@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", (socket) => {
     console.log("User Disconnected: " + socket.id);
-    if (waiting == socket) {
+    if (waiting.socket == socket) {
       waiting = null
     }
     // later implement actively playing users leaving
@@ -165,6 +165,18 @@ io.on("connection", (socket) => {
 
 
   })
+  socket.on("leaderboard",() => {
+    //sort by highest elo
+    db.all("SELECT * FROM users ORDER BY elo DESC LIMIT 10", [], (err, rows) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      socket.emit("leaderboard", rows);
+    });
+  })
+
+
   socket.on("combine", (id, selected, coord) => {
     if (games[id].board[selected[0]][selected[1]] == games[id].board[coord[0]][coord[1]]) {
       games[id].board[coord[0]][coord[1]] *= 2

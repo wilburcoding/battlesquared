@@ -209,7 +209,30 @@ button:hover {
   background-color: rgba(0, 0, 0, 0.8);
   z-index: 2000;
 }
-
+#popupback4 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+}
+#lboardpopup {
+  padding: 15px;
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: rgb(255, 247, 237);
+  border-radius: 2px;
+}
 #popup2 {
   padding: 15px;
   display: flex;

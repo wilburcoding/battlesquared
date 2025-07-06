@@ -23,6 +23,11 @@
       <button id="subnewuser">Submit</button>
     </div>
   </div>
+  <div id="popupback4">
+    <div id="lboardpopup">
+
+    </div>
+  </div>
   <div id="popupback2">
     <div id="popup2">
       <h1 style="font-size:40px;text-align:center;margin-top:5px;margin-bottom:5px;">Game Over</h1>
@@ -30,16 +35,22 @@
         <div
           style="position:relative;width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
           class="bgblue" id="bresult">
-          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" ><span id="buser" style="margin-right:5px;"></span>
-            <span style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span id="g-belo">1000</span><span style="color:lightgreen;margin-left:5px;" id="g-bchange">+8</span></span></p>
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;"><span id="buser"
+              style="margin-right:5px;"></span>
+            <span
+              style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span
+                id="g-belo">1000</span><span style="color:lightgreen;margin-left:5px;" id="g-bchange">+8</span></span>
+          </p>
           <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="bscore">2156</p>
         </div>
         <div
           style="position:relative;width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
           class="bgred" id="rresult">
-          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;"><span id="ruser" style="margin-right:5px;"></span><span
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;"><span id="ruser"
+              style="margin-right:5px;"></span><span
               style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span
-              id="g-relo">1000</span><span style="color:lightpink;margin-left:5px;" id="g-rchange">-8</span></span></p>
+                id="g-relo">1000</span><span style="color:lightpink;margin-left:5px;" id="g-rchange">-8</span></span>
+          </p>
           <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="rscore">2156</p>
 
         </div>
@@ -81,13 +92,13 @@
   </div>
   <div id="main-content">
     <div id="menu">
-      <h1 style="font-size:40px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
+      <h1 style="font-size:50px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
       <p style="font-size:15px;margin-top:1px;margin-bottom:6px;line-height:15px;" id="info">Signing in...</p>
-      <button id="signin" disabled>Sign In</button>
-      <button id="how">How to Play</button>
-      <button id="logout" style="display:none">Log Out</button>
+      <button id="signin" style="width:150px" disabled>Sign In</button>
+      <button id="leaderboard" style="width:150px">Leaderboard</button>
+      <button id="how" style="width:150px">Instructions</button>
+      <button id="logout" style="display:none;width:150px">Log Out</button>
     </div>
-
   </div>
   <h1></h1>
   <script src="/socket.io/socket.io.js"></script>
@@ -129,10 +140,14 @@
         $("#popupback3").css("opacity", 0);
         $("#popupback3").css("display", "flex");
         $("#popupback3").animate({
-          opacity:1,
+          opacity: 1,
         }, 400)
 
       })
+      $("#leaderboard").click(function () {
+        socket.emit("leaderboard")
+      })
+
       $(".cell").click(function () {
         const coord = [$(this).attr("id").split("-")[0], $(this).attr("id").split("-")[1]]
         if (timer <= 0 || $(this).hasClass(gameinfo.red.uid == uinfo.uid ? "bgblue" : "bgred")) {
@@ -311,7 +326,7 @@
         })
 
       })
-      
+
       socket.on("set_user", () => {
         console.log("need to set user")
         // do some kind of popup
@@ -335,6 +350,7 @@
               style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span
               id="g-relo">${info.elo}</span></span>`);
       })
+
       socket.on("waiting", () => {
         $("#g-infotop").html("Waiting for players...");
       })
@@ -378,6 +394,39 @@
       socket.on("update_bank", (gamedat) => {
         gameinfo = gamedat
         updateBank();
+      })
+      socket.on("leaderboard", (data) => {
+        $("#lboardpopup").html("<h1>Leaderboard</h1>")
+        console.log(data);
+        for (let i = 0; i < data.length; i++) {
+          let item = data[i];
+          $("#lboardpopup").append(`
+          <div style="margin:5px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;background-color:rgb(255, 240, 221);color:black;border:solid 1px black;padding:5px;border-radius:3px">
+            <div style="height:25px;width:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;width:40px;">
+              <p style="font-size:30px;font-weight:400;margin-top:1px;margin-bottom:3px;font-weight:800;margin-right:8px;">${i+1}</p>
+            </div>
+            <p style="font-size:24px;font-weight:400;margin-top:1px;margin-bottom:3px;width:350px;display:flex;align-items:center;justify-content:flex-start;">${item.username}
+              </span><span
+              style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px;margin-left:5px"><span
+              id="g-relo">${item.elo}</span></span>
+              </p>
+          </div>
+          `)
+        }
+        $("#lboardpopup").append("<button id=\"closel\">Close</button>")
+        $("#closel").click(function () {
+          $("#popupback4").animate({
+            opacity: 0
+          }, 400, () => {
+            $("#popupback4").css("display", "none");
+          })
+        })
+        $("#popupback4").css("opacity", 0);
+        $("#popupback4").css("display","flex")
+        $("#popupback4").animate({
+          opacity: 1
+        }, 400)
+        
       })
 
       socket.on("end_game_results", (data) => {
