@@ -573,7 +573,6 @@
                 bank.push(val)
               }
             } else {
-              
               if (gameinfo.bbank.length < 4 && Math.random() > 0.6) {
                 const val = [2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 8][Math.floor((Math.random() * 12))]
                 socket.emit("add_bank", gameinfo.id, uinfo.uid, val);
