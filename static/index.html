@@ -30,18 +30,21 @@
         <div
           style="position:relative;width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
           class="bgblue" id="bresult">
-          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" id="buser">Username 1</p>
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" ><span id="buser" style="margin-right:5px;"></span>
+            <span style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span id="g-belo">1000</span><span style="color:lightgreen;margin-left:5px;" id="g-bchange">+8</span></span></p>
           <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="bscore">2156</p>
         </div>
         <div
-          style="width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
+          style="position:relative;width:250px;margin:10px;display:flex;flex-direction: column;align-items: center;justify-content: center;padding-top:10px;padding-bottom:10px;"
           class="bgred" id="rresult">
-          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;" id="ruser">Username 1</p>
+          <p style="font-size:20px;font-weight: 400;margin-top:5px;margin-bottom:5px;"><span id="ruser" style="margin-right:5px;"></span><span
+              style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span
+              id="g-relo">1000</span><span style="color:lightpink;margin-left:5px;" id="g-rchange">-8</span></span></p>
           <p style="font-size:40px;font-weight: 700;margin-top:5px;margin-bottom:5px;" id="rscore">2156</p>
 
         </div>
       </div>
-      <button id="return">Return Home</button>
+      <button id="return">Home</button>
     </div>
   </div>
   <div id="popupback3">
@@ -79,13 +82,12 @@
   <div id="main-content">
     <div id="menu">
       <h1 style="font-size:40px;text-align: center;margin-top:5px;margin-bottom:5px;">BattleSquared</h1>
-      <p style="font-size:15px;margin-top:1px;margin-bottom:2px;line-height:15px;" id="info">Signing in...</p>
+      <p style="font-size:15px;margin-top:1px;margin-bottom:6px;line-height:15px;" id="info">Signing in...</p>
       <button id="signin" disabled>Sign In</button>
       <button id="how">How to Play</button>
-
       <button id="logout" style="display:none">Log Out</button>
-
     </div>
+
   </div>
   <h1></h1>
   <script src="/socket.io/socket.io.js"></script>
@@ -329,7 +331,9 @@
         });
         console.log(info);
         uinfo = info;
-        $("#info").html("Signed in as: <strong>" + info.username + "</strong>");
+        $("#info").html("Signed in as: <strong>" + info.username + "</strong>" + `<span id="ruser" style="margin-right:5px;"></span><span
+              style="background-color: rgb(68, 68, 68);color:rgb(236, 236, 236);font-size:15px;padding:2px 5px;border-radius:3px"><span
+              id="g-relo">${info.elo}</span></span>`);
       })
       socket.on("waiting", () => {
         $("#g-infotop").html("Waiting for players...");
@@ -412,6 +416,25 @@
         $("#buser").html(gameinfo.blue.username);
         $("#rscore").html(rscore);
         $("#bscore").html(bscore);
+        $("#g-relo").html(gameinfo.red.elo);
+        $("#g-belo").html(gameinfo.blue.elo);
+        if (bscore > rscore) {
+          $("#g-bchange").html("+8");
+          $("#g-bchange").css("color", "lightgreen");
+          $("#g-rchange").html("-8");
+          $("#g-rchange").css("color", "lightpink");
+        } else if (rscore > bscore) {
+          $("#g-rchange").html("+8");
+          $("#g-rchange").css("color", "lightgreen");
+          $("#g-bchange").html("-8");
+          $("#g-bchange").css("color", "lightpink");
+        } else {
+          $("#g-rchange").html("+0");
+          $("#g-rchange").css("color", "lightgray");
+          $("#g-bchange").html("+0");
+          $("#g-bchange").css("color", "lightgray");
+        }
+
         $("#popupback2").css("opacity", 0);
         $("#popupback2").css("display", "flex");
         $("#popupback2").animate({

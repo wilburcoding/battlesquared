@@ -59,7 +59,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("set_user", (user, id) => {
-    db.run("INSERT INTO users (uid, username) VALUES (?, ?)", [id, user], (err) => {
+    db.run("INSERT INTO users (uid, username, elo) VALUES (?, ?, ?)", [id, user, 1000], (err) => {
       if (err) {
         console.error(err);
       }
@@ -96,6 +96,26 @@ io.on("connection", (socket) => {
   })
   socket.on("end_game", (id) => {
     try {
+      let rscore = 0;
+      let bscore = 0;
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (games[id].board[i][j] < 0) {
+            rscore += Math.abs(games[id].board[i][j])
+          } else if (games[id].board[i][j] > 0) {
+            bscore += games[id].board[i][j]
+          }
+        }
+      }
+      if (rscore > bscore) {
+        // add 8 elo to red
+        db.run("UPDATE users SET elo = ? WHERE uid = ?", [games[id].red.info.elo + 8, games[id].red.info.uid])
+        db.run("UPDATE users SET elo = ? WHERE uid = ?", [games[id].blue.info.elo - 8, games[id].blue.info.uid])
+      } else if (rscore < bscore) {
+        // add 8 elo to blue
+        db.run("UPDATE users SET elo = ? WHERE uid = ?", [games[id].red.info.elo - 8, games[id].red.info.uid])
+        db.run("UPDATE users SET elo = ? WHERE uid = ?", [games[id].blue.info.elo + 8, games[id].blue.info.uid])
+      } 
       games[id].red.socket.emit("end_game_results", ndat(games[id]))
       games[id].blue.socket.emit("end_game_results", ndat(games[id]))
       games[id] = null;
