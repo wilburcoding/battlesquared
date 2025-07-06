@@ -63,6 +63,8 @@ io.on("connection", (socket) => {
       if (err) {
         console.error(err);
       }
+
+      
       console.log(user + " has logged in (id: " + id + ")")
       socket.emit("user_info", { uid: id, username: user })
     });
