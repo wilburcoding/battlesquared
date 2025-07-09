@@ -26,4 +26,4 @@ Selected tiles will appear with a black border, and clicking on them again will 
 
 Note: You can't capture tiles in the starting area. You can can only move tiles out of the starting area
 
-
+The higher the total values of your tiles are, the higher your score is - try and beat your opponent with a higher score!
